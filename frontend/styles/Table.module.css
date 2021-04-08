@@ -1,0 +1,12 @@
+.table tr:nth-last-of-type(odd){
+    background-color: #f3f2f8;
+}
+
+.table tr{
+    display: flex;
+    justify-content: space-between;
+}
+
+.table td{
+    padding: 0.5rem;
+}
