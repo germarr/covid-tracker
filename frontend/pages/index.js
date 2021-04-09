@@ -3,17 +3,25 @@ import Head from 'next/head'
 import { useState,useEffect } from 'react'
 import styled from "styled-components"
 import Infobox from "../components/Infobox"
-import Map from "../components/Map"
 import Table from "../components/Table"
 import {sortData} from "../components/util"
 import LineGraph from "../components/LineGraph"
+import dynamic from "next/dynamic";
 
 export default function Home() {
+
   const [countries, setCountries] =useState([])
   const [country, setCountry] = useState("worldwide")
   const [countryInfo, setCountryInfo] = useState({})
   const [tableData, setTableData] = useState([])
- 
+  const [mapCenter, setMapCenter] = useState({lat:34.80764,lon:-40.4796})
+  const [mapZoom, setMapZoom] = useState(3)
+  const [mapCountries, setMapCountrires] = useState([])
+
+  const MapWithNoSSR = dynamic(() => import("../components/Maps"), {
+    ssr: false
+  })
+  
   useEffect(()=>{
     fetch("https://disease.sh/v3/covid-19/all")
     .then((response)=>response.json())
@@ -21,6 +29,7 @@ export default function Home() {
       setCountryInfo(data)
     })
   },[])
+
 
   useEffect(()=>{
     const getCountries = async() =>{
@@ -35,6 +44,7 @@ export default function Home() {
       const sortedData = sortData(data)
       setTableData(sortedData);
       setCountries(countries);
+      setMapCountrires(data)
       })
       
     };
@@ -50,6 +60,8 @@ export default function Home() {
     .then(data => {
       setCountry(countryCode)
       setCountryInfo(data)
+      setMapCenter([data.countryInfo.lat, data.countryInfo.long])
+      setMapZoom(4)
     })
     
   }
@@ -81,8 +93,8 @@ export default function Home() {
               <Infobox title="Corona Cases" cases={countryInfo.todayCases} total={countryInfo.cases}/>
               <Infobox title="Recovered" cases={countryInfo.todayRecovered} total={countryInfo.recovered}/>
               <Infobox title="Deaths" cases={countryInfo.todayDeaths} total={countryInfo.deaths}/>
-            </Appstats>
-            <Map/>
+            </Appstats>       
+            <MapWithNoSSR countries={mapCountries} center={mapCenter} zoom={mapZoom}/>
         </AppLeft>
         <AppRight>
           <Card>
